@@ -4,9 +4,10 @@ Auteur :
 
 Date :
 
-But du projet :
+But du project :
 
 """
+from chemin_augmentant import Graph
 
 
 def readInstance(file_path):
@@ -24,7 +25,11 @@ def readInstance(file_path):
 
 
 def main():
-    print(readInstance("Instances/inst-100-0.1.txt"))
+    instance = "Instances/inst-700-0.3.txt"
+    #print(readInstance(instance))
+    nodes, source, sink, arcs, capacities = readInstance(instance)
+    g = Graph(nodes, source, sink, arcs, capacities)
+    print(g.augmenting_paths())
 
 
 if __name__ == '__main__':
