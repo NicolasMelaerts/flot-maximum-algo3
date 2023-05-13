@@ -26,7 +26,7 @@ class Graph:
                 self.mark[i] = [0, 0]
 
             optimal = self.marking()  # 1) phase de marquage
-            self.augmentation()        # 2) phase d'augmentation
+            self.augmentation()       # 2) phase d'augmentation
 
         return sum(self.f[self.s])  # flot maximum (=somme des flots sortant de s)
 
@@ -46,7 +46,7 @@ class Graph:
                     alpha_i = self.mark[i][1]
                     alpha_j = min(alpha_i, self.f[j][i])
                     self.mark[j] = [i, alpha_j]
-                    L.append(i)
+                    L.append(j)
         if self.mark[self.t][1] == 0:
             return True  # plus de chemin augmentant - STOP
         return False
