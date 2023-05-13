@@ -7,7 +7,10 @@ Date :
 But du project :
 
 """
+import os
+
 from chemin_augmentant import Graph
+from generate_model import generateLP
 
 
 def readInstance(file_path):
@@ -25,11 +28,17 @@ def readInstance(file_path):
 
 
 def main():
-    instance = "Instances/inst-700-0.3.txt"
+    instance = "Instances/inst-100-0.1.txt"
     #print(readInstance(instance))
     nodes, source, sink, arcs, capacities = readInstance(instance)
     g = Graph(nodes, source, sink, arcs, capacities)
     print(g.augmenting_paths())
+
+    generateLP(instance);
+
+    # Call GLPK to solve the LP problem
+    #os.system("glpsol --lp model.lp -o model.sol")
+
 
 
 if __name__ == '__main__':
