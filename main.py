@@ -27,9 +27,13 @@ def readInstance(file_path):
     return nodes, source, sink, arcs, capacities
 
 
+
+
+
+
 def main():
     instance = "Instances/inst-100-0.1.txt"
-    #print(readInstance(instance))
+
     nodes, source, sink, arcs, capacities = readInstance(instance)
     g = Graph(nodes, source, sink, arcs, capacities)
     print(g.augmenting_paths())
@@ -37,9 +41,7 @@ def main():
     generateLP(instance);
 
     # Call GLPK to solve the LP problem
-    #os.system("glpsol --lp model.lp -o model.sol")
-
-
+    os.system("glpsol --lp model.lp -o model.sol")
 
 if __name__ == '__main__':
     main()
