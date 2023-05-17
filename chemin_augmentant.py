@@ -1,6 +1,5 @@
 """
-Chemins augmentants:
-    Nouvelle tentative
+Chemins augmentants
 """
 
 
