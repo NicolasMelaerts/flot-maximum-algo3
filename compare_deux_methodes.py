@@ -15,7 +15,7 @@ class Graph:
         self.u = capacities  # capacités des arcs
 
     def writeManu(self):
-        text = "Maximise\n"
+        text = "Maximize\n"
         text += self.make_objective()
         text += "\nSubject To\n"
         text += self.make_constraints()
@@ -39,19 +39,29 @@ class Graph:
         flot_source = ""
         flot_puits = ""
         for i in range(self.n):
-            flots_entrants = ""
             flots_sortants = ""
-            for j in range(self.n):
-                if self.u[i][j] > 0:
-                    flots_entrants += " + f_" + str(i) + "_" + str(j)
-                elif self.u[j][i] > 0:
-                    flots_sortants += " - f_" + str(j) + "_" + str(i)
+            flots_entrants = ""
+
             if i == self.s:
-                flot_source = flots_entrants[3:]  # source
+                for j in range(self.n):
+                    if self.u[i][j] > 0 and j != self.t:
+                        flots_sortants += " + f_" + str(i) + "_" + str(j)
+                flot_source = flots_sortants[3:]  # source
+
             elif i == self.t:
-                flot_puits = flots_sortants[3:]  # puits
+                for j in range(self.n):
+                    if self.u[j][i] > 0 and j != self.s:
+                        flots_entrants += " - f_" + str(j) + "_" + str(i)
+                flot_puits = flots_entrants[3:]  # puits
+
             else:
-                constraints += "\n    " + flots_entrants[3:] + " - " + flots_sortants[3:] + " = 0"
+                for j in range(self.n):
+                    if self.u[i][j] > 0:
+                        flots_sortants += " + f_" + str(i) + "_" + str(j)
+                    elif self.u[j][i] > 0:
+                        flots_entrants += " - f_" + str(j) + "_" + str(i)
+                constraints += "\n    " + flots_sortants[3:] + " - " + flots_entrants[3:] + " = 0"
+
         constraints += "\n    " + flot_source + " - " + flot_puits + " = 0"
         return constraints[1:]
 

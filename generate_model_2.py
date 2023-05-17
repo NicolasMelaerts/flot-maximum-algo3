@@ -12,7 +12,7 @@ class Graph:
         self.u = capacities  # capacités des arcs
 
     def write(self):
-        text = "Maximise\n"
+        text = "Maximize\n"
         text += self.make_objective()
         text += "\nSubject To\n"
         text += self.make_constraints()
@@ -22,6 +22,20 @@ class Graph:
         text += self.make_integer()
         text += "\nEnd"
         print(text)
+
+    def generate_lp(self):
+        text = "Maximize\n"
+        text += self.make_objective()
+        text += "\nSubject To\n"
+        text += self.make_constraints()
+        text += "\nBounds\n"
+        text += self.make_bounds()
+        text += "\nInteger\n"
+        text += self.make_integer()
+        text += "\nEnd"
+        with open("model.lp", "w") as lp_file:
+            lp_file.write(text)
+            lp_file.write("End\n")
 
     def make_objective(self):
         obj = "    obj: "
@@ -36,19 +50,29 @@ class Graph:
         flot_source = ""
         flot_puits = ""
         for i in range(self.n):
-            flots_entrants = ""
             flots_sortants = ""
-            for j in range(self.n):
-                if self.u[i][j] > 0:
-                    flots_entrants += " + f_" + str(i) + "_" + str(j)
-                elif self.u[j][i] > 0:
-                    flots_sortants += " - f_" + str(j) + "_" + str(i)
+            flots_entrants = ""
+
             if i == self.s:
-                flot_source = flots_entrants[3:]  # source
+                for j in range(self.n):
+                    if self.u[i][j] > 0 and j != self.t:
+                        flots_sortants += " + f_" + str(i) + "_" + str(j)
+                flot_source = flots_sortants[3:]  # source
+
             elif i == self.t:
-                flot_puits = flots_sortants[3:]  # puits
+                for j in range(self.n):
+                    if self.u[j][i] > 0 and j != self.s:
+                        flots_entrants += " - f_" + str(j) + "_" + str(i)
+                flot_puits = flots_entrants[3:]  # puits
+
             else:
-                constraints += "\n    " + flots_entrants[3:] + " - " + flots_sortants[3:] + " = 0"
+                for j in range(self.n):
+                    if self.u[i][j] > 0:
+                        flots_sortants += " + f_" + str(i) + "_" + str(j)
+                    elif self.u[j][i] > 0:
+                        flots_entrants += " - f_" + str(j) + "_" + str(i)
+                constraints += "\n    " + flots_sortants[3:] + " - " + flots_entrants[3:] + " = 0"
+
         constraints += "\n    " + flot_source + " - " + flot_puits + " = 0"
         return constraints[1:]
 
@@ -69,12 +93,28 @@ class Graph:
         return integer[1:]
 
 
-m = [[0, 20, 30, 80,  0],
-     [0,  0, 40,  0, 30],
-     [0,  0,  0, 10, 20],
-     [0,  0,  5,  0, 30],
-     [0,  0,  0,  0,  0]]
+def read_instance(file_path):
+    with open(file_path, "r") as file:
+        lines = file.readlines()
+        nodes = int(lines[0].split()[1])
+        source = int(lines[1].split()[1])
+        sink = int(lines[2].split()[1])
+        arcs = int(lines[3].split()[1])
+        capacities = [[0 for _ in range(nodes)] for _ in range(nodes)]
+        for line in lines[4:]:
+            i, j, c = line.split()
+            capacities[int(i)][int(j)] = int(c)
+    return nodes, source, sink, arcs, capacities
 
-A = Graph(5, 0, 4, 9, m)
 
-A.write()
+def main():
+    instance = "Instances/inst-100-0.1.txt"
+
+    nodes, source, sink, arcs, capacities = read_instance(instance)
+    g = Graph(nodes, source, sink, arcs, capacities)
+
+    g.generate_lp()
+
+
+if __name__ == '__main__':
+    main()
