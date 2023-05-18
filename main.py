@@ -9,6 +9,7 @@ But du project :
 """
 
 import glob
+import os
 
 from chemin_augmentant import GraphCheminAugmentant
 from generate_model import Graph
@@ -41,31 +42,47 @@ def recupSol(fichier):
 
 
 def main():
+    fichiers = ['inst-100-0.1.txt', 'inst-100-0.2.txt', 'inst-100-0.3.txt', 'inst-200-0.1.txt', 'inst-200-0.2.txt', 'inst-200-0.3.txt', 'inst-300-0.1.txt', 'inst-300-0.2.txt', 'inst-300-0.3.txt', 'inst-400-0.1.txt', 'inst-400-0.2.txt', 'inst-400-0.3.txt', 'inst-500-0.1.txt', 'inst-500-0.2.txt', 'inst-500-0.3.txt', 'inst-600-0.1.txt', 'inst-600-0.2.txt', 'inst-600-0.3.txt', 'inst-700-0.1.txt', 'inst-700-0.2.txt', 'inst-700-0.3.txt', 'inst-800-0.1.txt', 'inst-800-0.2.txt', 'inst-800-0.3.txt', 'inst-900-0.1.txt', 'inst-900-0.2.txt', 'inst-900-0.3.txt', 'inst-1000-0.1.txt', 'inst-1000-0.2.txt', 'inst-1000-0.3.txt', 'inst-1100-0.1.txt', 'inst-1100-0.2.txt', 'inst-1100-0.3.txt', 'inst-1200-0.1.txt', 'inst-1200-0.2.txt', 'inst-1200-0.3.txt', 'inst-1300-0.1.txt', 'inst-1300-0.2.txt', 'inst-1300-0.3.txt', 'inst-1400-0.1.txt', 'inst-1400-0.2.txt', 'inst-1400-0.3.txt', 'inst-1500-0.1.txt', 'inst-1500-0.2.txt', 'inst-1500-0.3.txt']
+    solCheminAugmentant = []
+    solGenerateModel = []
 
-    fichiers = glob.glob('Instances/*')
 
-    for i in range(len(fichiers)):
-        fichiers[i] = fichiers[i][10:]
-
-    fichiers.sort()
 
     for fichier in fichiers:
-        print(fichier)
         nodes, source, sink, arcs, capacities = read_instance(fichier)
-        g = GraphCheminAugmentant(nodes, source, sink, arcs, capacities)
+        gCheminAugmentant = GraphCheminAugmentant(nodes, source, sink, arcs, capacities)
+        solCheminAugmentant.append(gCheminAugmentant.augmenting_paths())
 
-        g2 = Graph(nodes, source, sink, arcs, capacities)
-        text = g2.generate_lp()
-        nomSol = g2.solTest(fichier, text)
+        gGenerateModel = Graph(nodes, source, sink, arcs, capacities)
+        text = gGenerateModel.generate_lp()
+
+        lpfile = "model-" + fichier[5:12] + "lp"
+
+        with open(lpfile, "w") as f:
+            f.write(text)
+
+        solFile = lpfile[:-3] + ".sol"
+
+        str = "glpsol --lp " + lpfile + " -o " + solFile
+
+        os.system(str + ' > fichier_sortie.txt')
+
+        solGenerateModel.append(recupSol(solFile))
+
+    for i in range(len(fichiers)):
+        print(fichiers[i])
+
+        str1 = "Chemin augmentant : "
+        print(str1)
+        print(solCheminAugmentant[i])
+
+        str2 = "Generate model : "
+        print(str2)
+        print(solGenerateModel[i])
+
+        print('\n')
 
 
-        print(g.augmenting_paths())
-
-        print(recupSol(nomSol))
-
-
-
-    print(fichiers)
 
 
 

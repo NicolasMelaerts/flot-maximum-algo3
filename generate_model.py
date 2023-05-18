@@ -76,20 +76,6 @@ class Graph:
                     integer += "\n    " + "f_" + str(i) + "_" + str(j)
         return integer[1:]
 
-    def solTest(self, instance, text):
-        solutionFile = "model-" + instance[5:12] + ".lp"
-
-        with open(solutionFile, "w") as lp_file:
-            lp_file.write(text)
-
-        solutionFile2 = solutionFile[:-3] + ".sol"
-
-        str = "glpsol --lp " + solutionFile +  " -o " + solutionFile2
-
-        os.system('str > fichier_sortie.txt')
-
-        return solutionFile2
-
 
 def read_instance(file_path):
     with open(file_path, "r") as file:

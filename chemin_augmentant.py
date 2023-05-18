@@ -86,7 +86,8 @@ def main():
 
     g = GraphCheminAugmentant(nodes, source, sink, arcs, capacities)
 
-    solutionFile = "model-" + instance[5:12] + ".path"
+    solutionFile = "model-" + instance[5:]
+    solutionFile = solutionFile[:-4] + ".path"
 
     with open(solutionFile, "w") as lp_file:
         lp_file.write(str(g.augmenting_paths()))
