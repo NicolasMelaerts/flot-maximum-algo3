@@ -1,4 +1,97 @@
-def readInstance(file_path):
+import sys
+import os
+class Graph:
+    def __init__(self, nodes, source, sink, arcs, capacities):
+        self.n = nodes  # nombre de noeuds
+        self.s = source  # numéro de la source
+        self.t = sink  # numéro du puits
+        self.a = arcs  # nombre d'arcs
+        self.u = capacities  # capacités des arcs
+
+    def generate_lp(self):
+        text = "Maximize\n"
+        text += self.make_objective()
+        text += "\nSubject To\n"
+        text += self.make_constraints()
+        text += "\nBounds\n"
+        text += self.make_bounds()
+        text += "\nInteger\n"
+        text += self.make_integer()
+        text += "\nEnd"
+
+        return text
+
+    def make_objective(self):
+        obj = "    obj: "
+        objective = ""
+        for i in range(self.n):
+            if self.u[self.s][i] > 0:
+                objective += " + f_" + str(self.s) + "_" + str(i)
+        return obj + objective[3:]
+
+    def make_constraints(self):
+        constraints = ""
+        flot_source = ""
+        flot_puits = ""
+        for i in range(self.n):
+            flots_sortants = ""
+            flots_entrants = ""
+
+            if i == self.s:
+                for j in range(self.n):
+                    if self.u[i][j] > 0 and j != self.t:
+                        flots_sortants += " + f_" + str(i) + "_" + str(j)
+                flot_source = flots_sortants[3:]  # source
+
+            elif i == self.t:
+                for j in range(self.n):
+                    if self.u[j][i] > 0 and j != self.s:
+                        flots_entrants += " - f_" + str(j) + "_" + str(i)
+                flot_puits = flots_entrants[3:]  # puits
+
+            else:
+                for j in range(self.n):
+                    if self.u[i][j] > 0:
+                        flots_sortants += " + f_" + str(i) + "_" + str(j)
+                    elif self.u[j][i] > 0:
+                        flots_entrants += " - f_" + str(j) + "_" + str(i)
+                constraints += "\n    " + flots_sortants[3:] + " - " + flots_entrants[3:] + " = 0"
+
+        constraints += "\n    " + flot_source + " - " + flot_puits + " = 0"
+        return constraints[1:]
+
+    def make_bounds(self):
+        bounds = ""
+        for i in range(self.n):
+            for j in range(self.n):
+                if self.u[i][j] > 0:
+                    bounds += "\n    " + "0 <= f_" + str(i) + "_" + str(j) + " <= " + str(self.u[i][j])
+        return bounds[1:]
+
+    def make_integer(self):
+        integer = ""
+        for i in range(self.n):
+            for j in range(self.n):
+                if self.u[i][j] > 0:
+                    integer += "\n    " + "f_" + str(i) + "_" + str(j)
+        return integer[1:]
+
+    def solTest(self, instance, text):
+        solutionFile = "model-" + instance[5:12] + ".lp"
+
+        with open(solutionFile, "w") as lp_file:
+            lp_file.write(text)
+
+        solutionFile2 = solutionFile[:-3] + ".sol"
+
+        str = "glpsol --lp " + solutionFile +  " -o " + solutionFile2
+
+        os.system('str > fichier_sortie.txt')
+
+        return solutionFile2
+
+
+def read_instance(file_path):
     with open(file_path, "r") as file:
         lines = file.readlines()
         nodes = int(lines[0].split()[1])
@@ -12,80 +105,21 @@ def readInstance(file_path):
     return nodes, source, sink, arcs, capacities
 
 
-def generateObjectiveFunction(capacities, nodes, source):
-    obj = "    obj: "
-    fonct = ""
 
-    for i in range(nodes):
-        for j in range(nodes):
-            if capacities[i][j] > 0:
-                if i == source:
-                    fonct += " + x_" + str(i) + "_" + str(j)
-                elif j == source:
-                    fonct += " - x_" + str(i) + "_" + str(j)
+def main():
+    instance = sys.argv[1]
 
-    return obj + fonct[2:]
+    nodes, source, sink, arcs, capacities = read_instance(instance)
 
+    g = Graph(nodes, source, sink, arcs, capacities)
 
+    text = g.generate_lp()
 
+    solutionFile = "model-" + instance[5:12] + ".lp"
 
-def generateConstraints(nodes, source, sink, capacities):
-    used_vars = set()
-    constraints = []
-    for i in range(nodes):
-        if i != source and i != sink:
-            temp = []
-            for j in range(nodes):
-                if capacities[i][j] > 0:
-                    temp.append(" + x_" + str(i) + "_" + str(j))
-                    used_vars.add((i, j))
-                if capacities[j][i] > 0 and (j, i) not in used_vars:
-                    temp.append(" - x_" + str(j) + "_" + str(i))
-            constraint = "    c_" + str(i) + ":"
-            for t in temp:
-                constraint += t
-            constraint += " = 0"
-            constraints.append(constraint)
-
-    return constraints
+    with open(solutionFile, "w") as lp_file:
+        lp_file.write(text)
 
 
-
-
-def generateVariables(nodes):
-    variables = []
-    for i in range(nodes):
-        for j in range(nodes):
-            if i != j:
-                variable = "x_" + str(i) + "_" + str(j)
-                variables.append(variable)
-    return variables
-
-
-def generateLP(file):
-    nodes, source, sink, arcs, capacities = readInstance(file)
-
-    obj = generateObjectiveFunction(capacities, nodes, source)
-
-    const = generateConstraints(nodes, source, sink, capacities)
-
-    vars = generateVariables(nodes)
-
-    # Écrire dans le fichier lp
-    with open("model.lp", "w") as lp_file:
-        lp_file.write("Maximize\n")
-        lp_file.write(obj)
-        lp_file.write("\nSubject To\n")
-
-        for constraint in const:
-            lp_file.write(constraint + "\n")
-
-        lp_file.write("Bounds\n")
-        for variable in vars:
-            lp_file.write("    0 <= " + str(variable) + " <= 1\n")
-
-        lp_file.write("Integer\n")
-        for variable in vars:
-            lp_file.write("    " + str(variable) + "\n")
-
-        lp_file.write("End\n")
+if __name__ == '__main__':
+    main()

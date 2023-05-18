@@ -1,6 +1,7 @@
 """
 Version Manu
 """
+import os
 
 
 class Graph:
@@ -114,6 +115,8 @@ def main():
     g = Graph(nodes, source, sink, arcs, capacities)
 
     g.generate_lp()
+
+    os.system("glpsol --lp model.lp -o model.sol")
 
 
 if __name__ == '__main__':

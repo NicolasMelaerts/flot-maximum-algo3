@@ -2,11 +2,13 @@
 Chemins augmentants
 """
 
+import sys;
+
 
 INF = 1000000000  # +infini
 
 
-class Graph:
+class GraphCheminAugmentant:
     def __init__(self, nodes, source, sink, arcs, capacities):
         self.n = nodes       # nombre de noeuds
         self.s = source      # numéro de la source
@@ -77,12 +79,17 @@ def read_instance(file_path):
 
 
 def main():
-    instance = "Instances/inst-100-0.1.txt"
+
+    instance = sys.argv[1]
 
     nodes, source, sink, arcs, capacities = read_instance(instance)
-    g = Graph(nodes, source, sink, arcs, capacities)
 
-    print(g.augmenting_paths())
+    g = GraphCheminAugmentant(nodes, source, sink, arcs, capacities)
+
+    solutionFile = "model-" + instance[5:12] + ".path"
+
+    with open(solutionFile, "w") as lp_file:
+        lp_file.write(str(g.augmenting_paths()))
 
 
 if __name__ == '__main__':

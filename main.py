@@ -7,13 +7,15 @@ Date :
 But du project :
 
 """
-import os
 
-from chemin_augmentant import Graph
-from generate_model import generateLP
+import glob
+
+from chemin_augmentant import GraphCheminAugmentant
+from generate_model import Graph
 
 
-def readInstance(file_path):
+def read_instance(file_path):
+    file_path = "Instances/" + file_path
     with open(file_path, "r") as file:
         lines = file.readlines()
         nodes = int(lines[0].split()[1])
@@ -26,22 +28,51 @@ def readInstance(file_path):
             capacities[int(i)][int(j)] = int(c)
     return nodes, source, sink, arcs, capacities
 
+def recupSol(fichier):
+    with open(fichier, "r") as file:
+        ligneSol = [next(file) for i in range(6)]
 
+    ligneSol = ligneSol[5]
+    deb = ligneSol.find("=") + 1
+    fin = ligneSol.find("(")
+    ligneSol = ligneSol[deb:fin].strip()
 
-
+    return ligneSol
 
 
 def main():
-    instance = "Instances/inst-100-0.1.txt"
 
-    nodes, source, sink, arcs, capacities = readInstance(instance)
-    g = Graph(nodes, source, sink, arcs, capacities)
-    print(g.augmenting_paths())
+    fichiers = glob.glob('Instances/*')
 
-    generateLP(instance);
+    for i in range(len(fichiers)):
+        fichiers[i] = fichiers[i][10:]
 
-    # Call GLPK to solve the LP problem
-    os.system("glpsol --lp model.lp -o model.sol")
+    fichiers.sort()
+
+    for fichier in fichiers:
+        print(fichier)
+        nodes, source, sink, arcs, capacities = read_instance(fichier)
+        g = GraphCheminAugmentant(nodes, source, sink, arcs, capacities)
+
+        g2 = Graph(nodes, source, sink, arcs, capacities)
+        text = g2.generate_lp()
+        nomSol = g2.solTest(fichier, text)
+
+
+        print(g.augmenting_paths())
+
+        print(recupSol(nomSol))
+
+
+
+    print(fichiers)
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     main()
