@@ -8,7 +8,7 @@ But du project :
 
 """
 
-import glob
+import time
 import os
 
 from chemin_augmentant import GraphCheminAugmentant
@@ -26,7 +26,8 @@ def read_instance(file_path):
         capacities = [[0 for _ in range(nodes)] for _ in range(nodes)]
         for line in lines[4:]:
             i, j, c = line.split()
-            capacities[int(i)][int(j)] = int(c)
+            if i != j:  # Vérifie si les nœuds source et destination sont différents
+                capacities[int(i)][int(j)] = int(c)
     return nodes, source, sink, arcs, capacities
 
 def recupSol(fichier):
@@ -46,41 +47,72 @@ def main():
     solCheminAugmentant = []
     solGenerateModel = []
 
+    tempsCA = []
+    tempsGM = []
+    tempsSol = []
+
 
 
     for fichier in fichiers:
         nodes, source, sink, arcs, capacities = read_instance(fichier)
         gCheminAugmentant = GraphCheminAugmentant(nodes, source, sink, arcs, capacities)
+        start = time.time()
         solCheminAugmentant.append(gCheminAugmentant.augmenting_paths())
+        end = time.time()
+
+        tempsCA.append((end-start))
 
         gGenerateModel = Graph(nodes, source, sink, arcs, capacities)
+        start = time.time()
         text = gGenerateModel.generate_lp()
 
-        lpfile = "model-" + fichier[5:12] + "lp"
+        lpfile = fichier
+
+        lpfile = lpfile.replace("inst", "model")
+        lpfile = lpfile.replace("txt", "lp")
+
 
         with open(lpfile, "w") as f:
             f.write(text)
 
-        solFile = lpfile[:-3] + ".sol"
+        end = time.time()
+        tempsGM.append((end-start))
+
+
+        solFile = lpfile.replace("lp", "sol")
 
         str = "glpsol --lp " + lpfile + " -o " + solFile
 
+
+        start = time.time()
         os.system(str + ' > fichier_sortie.txt')
+        end = time.time()
+
+        tempsSol.append((end-start))
 
         solGenerateModel.append(recupSol(solFile))
 
     for i in range(len(fichiers)):
         print(fichiers[i])
 
-        str1 = "Chemin augmentant : "
-        print(str1)
+        print("Chemin augmentant : ")
         print(solCheminAugmentant[i])
 
-        str2 = "Generate model : "
-        print(str2)
+        print("Generate model : ")
         print(solGenerateModel[i])
 
+        if solCheminAugmentant[i] == int(solGenerateModel[i]):
+            print("\033[32mOKAY\033[0m")
+        else:
+            print("\033[31mNOT OKAY\033[0m")
+
         print('\n')
+
+    print(tempsCA)
+    print(tempsGM)
+    print(tempsSol)
+
+
 
 
 

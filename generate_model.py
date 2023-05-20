@@ -86,8 +86,9 @@ def read_instance(file_path):
         arcs = int(lines[3].split()[1])
         capacities = [[0 for _ in range(nodes)] for _ in range(nodes)]
         for line in lines[4:]:
-            i, j, c = line.split()
-            capacities[int(i)][int(j)] = int(c)
+            i, j, c = map(int, line.split())
+            if i != j:  # Vérifie si les nœuds source et destination sont différents
+                capacities[i][j] = c
     return nodes, source, sink, arcs, capacities
 
 
