@@ -1,6 +1,6 @@
 import sys
-import os
-class Graph:
+
+class GraphGenerateModel:
     def __init__(self, nodes, source, sink, arcs, capacities):
         self.n = nodes  # nombre de noeuds
         self.s = source  # numéro de la source
@@ -86,9 +86,9 @@ def read_instance(file_path):
         arcs = int(lines[3].split()[1])
         capacities = [[0 for _ in range(nodes)] for _ in range(nodes)]
         for line in lines[4:]:
-            i, j, c = map(int, line.split())
+            i, j, c = line.split()
             if i != j:  # Vérifie si les nœuds source et destination sont différents
-                capacities[i][j] = c
+                capacities[int(i)][int(j)] = int(c)
     return nodes, source, sink, arcs, capacities
 
 
@@ -98,13 +98,14 @@ def main():
 
     nodes, source, sink, arcs, capacities = read_instance(instance)
 
-    g = Graph(nodes, source, sink, arcs, capacities)
+    g = GraphGenerateModel(nodes, source, sink, arcs, capacities)
 
     text = g.generate_lp()
 
-    solutionFile = "model-" + instance[5:12] + ".lp"
+    solution_file = instance.replace("inst-", "model-")
+    solution_file = solution_file.replace("txt", "lp")
 
-    with open(solutionFile, "w") as lp_file:
+    with open(solution_file, "w") as lp_file:
         lp_file.write(text)
 
 

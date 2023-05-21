@@ -11,8 +11,8 @@ But du project :
 import time
 import os
 
-from chemin_augmentant import GraphCheminAugmentant
-from generate_model import Graph
+from MATHEY_MELAERTS.chemin_augmentant import GraphCheminAugmentant
+from MATHEY_MELAERTS.generate_model import GraphGenerateModel
 
 
 def read_instance(file_path):
@@ -45,7 +45,9 @@ def recupSol(fichier):
 def main():
     fichiers = ['inst-100-0.1.txt', 'inst-100-0.2.txt', 'inst-100-0.3.txt', 'inst-200-0.1.txt', 'inst-200-0.2.txt', 'inst-200-0.3.txt', 'inst-300-0.1.txt', 'inst-300-0.2.txt', 'inst-300-0.3.txt', 'inst-400-0.1.txt', 'inst-400-0.2.txt', 'inst-400-0.3.txt', 'inst-500-0.1.txt', 'inst-500-0.2.txt', 'inst-500-0.3.txt', 'inst-600-0.1.txt', 'inst-600-0.2.txt', 'inst-600-0.3.txt', 'inst-700-0.1.txt', 'inst-700-0.2.txt', 'inst-700-0.3.txt', 'inst-800-0.1.txt', 'inst-800-0.2.txt', 'inst-800-0.3.txt', 'inst-900-0.1.txt', 'inst-900-0.2.txt', 'inst-900-0.3.txt', 'inst-1000-0.1.txt', 'inst-1000-0.2.txt', 'inst-1000-0.3.txt', 'inst-1100-0.1.txt', 'inst-1100-0.2.txt', 'inst-1100-0.3.txt', 'inst-1200-0.1.txt', 'inst-1200-0.2.txt', 'inst-1200-0.3.txt', 'inst-1300-0.1.txt', 'inst-1300-0.2.txt', 'inst-1300-0.3.txt', 'inst-1400-0.1.txt', 'inst-1400-0.2.txt', 'inst-1400-0.3.txt', 'inst-1500-0.1.txt', 'inst-1500-0.2.txt', 'inst-1500-0.3.txt']
     solCheminAugmentant = []
+    minCut = []
     solGenerateModel = []
+
 
     tempsCA = []
     tempsGM = []
@@ -59,10 +61,11 @@ def main():
         start = time.time()
         solCheminAugmentant.append(gCheminAugmentant.augmenting_paths())
         end = time.time()
+        minCut.append(gCheminAugmentant.find_minimum_cut())
 
         tempsCA.append((end-start))
 
-        gGenerateModel = Graph(nodes, source, sink, arcs, capacities)
+        gGenerateModel = GraphGenerateModel(nodes, source, sink, arcs, capacities)
         start = time.time()
         text = gGenerateModel.generate_lp()
 
@@ -97,6 +100,7 @@ def main():
 
         print("Chemin augmentant : ")
         print(solCheminAugmentant[i])
+        print(minCut[i])
 
         print("Generate model : ")
         print(solGenerateModel[i])

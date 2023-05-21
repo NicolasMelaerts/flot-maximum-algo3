@@ -1,0 +1,8 @@
+GLPSOL--GLPK LP/MIP Solver 5.0
+Parameter(s) specified in the command line:
+ --lp model-1500-0.2.lp -o model-1500-0.2.sol
+Reading problem data from 'model-1500-0.2.lp'...
+model-1500-0.2.lp:900099: warning: missing final end of line
+1499 rows, 449297 columns, 808098 non-zeros
+449297 integer variables, 44778 of which are binary
+900099 lines were read

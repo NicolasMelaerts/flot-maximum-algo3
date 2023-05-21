@@ -2,7 +2,7 @@
 Chemins augmentants
 """
 
-import sys;
+import sys
 
 
 INF = 1000000000  # +infini
@@ -63,6 +63,15 @@ class GraphCheminAugmentant:
                 self.f[i][j] -= alpha_t  # (i,j) est un arc en arrière
             j = i
 
+    def find_minimum_cut(self):
+        min_cut_value = 0
+        for i in range(self.n):
+            if self.mark[i][1] != 0:  # si noeud marqué lors de la dernière itération
+                for j in range(self.n):
+                    if self.mark[j][1] == 0:    # si noeud non marqué lors de la dernière itération
+                        min_cut_value += self.u[i][j]   # ajoute la capacité car j appartient pas à la coupe minimale
+
+        return min_cut_value
 
 def read_instance(file_path):
     with open(file_path, "r") as file:
@@ -74,8 +83,12 @@ def read_instance(file_path):
         capacities = [[0 for _ in range(nodes)] for _ in range(nodes)]
         for line in lines[4:]:
             i, j, c = line.split()
-            capacities[int(i)][int(j)] = int(c)
+            if i != j:  # Vérifie si les nœuds source et destination sont différents
+                capacities[int(i)][int(j)] = int(c)
     return nodes, source, sink, arcs, capacities
+
+
+
 
 
 def main():
@@ -86,11 +99,16 @@ def main():
 
     g = GraphCheminAugmentant(nodes, source, sink, arcs, capacities)
 
-    solutionFile = "model-" + instance[5:]
-    solutionFile = solutionFile[:-4] + ".path"
+    solution_file = instance.replace("inst-", "model-")
+    solution_file = solution_file.replace("txt", "path")
 
-    with open(solutionFile, "w") as lp_file:
+    with open(solution_file, "w") as lp_file:
         lp_file.write(str(g.augmenting_paths()))
+
+    # coupe minimum pour vérifié optimalité
+    # print(g.find_minimum_cut())
+
+
 
 
 if __name__ == '__main__':
